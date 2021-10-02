@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
+</head>
+<body>
+  <div>
+    <canvas id="myChart"></canvas>
+  </div>
+  <script>
+    const cData = {
+      label: 'C(t)',
+      data: [],
+      backgroundColor: '#c0c0c0',
+      pointRadius: 1,
+    }
+    const lData = {
+      label: 'L(t)',
+      data: [],
+      backgroundColor: '#000000',
+      pointRadius: 1,
+    }
+    const wData = {
+      label: 'W(t)',
+      data: [],
+      backgroundColor: 'rgb(255, 99, 132)',
+      pointRadius: 1,
+    }
+    const noiseData = {
+      label: 'Noise(t)',
+      data: [],
+      backgroundColor: '#4169E1',
+      pointRadius: 1,
+    }
+    const datasets = []
+
+    // 範囲
+    const range = [-7,7]
+    // 点の細かさ
+    const rough = 100
+    // 傾きa
+    const aList = Array.from({length: range[1]-range[0]+1}, () => (Math.random() - 0.5) * 5)
+    // ウェーブレット関数とノイズを計算
+    for (let x = range[0]; x < range[1]; x += 1/rough) {
+      // w0
+      const x0 = x < 0 ? 1 + x % 1 : x % 1
+      const c0 = 1 - 3*x0**2 + 2*Math.abs(x0)**3
+      const l0 = aList[Math.floor(x)+Math.abs(range[0])] * x0
+      const w0 = c0 * l0
+
+      // w1
+      const x1 = x < 0 ? x % 1 : x % 1 - 1
+      const c1 = 1 - 3*x1**2 + 2*Math.abs(x1)**3
+      const l1 = aList[Math.floor(x)+Math.abs(range[0])+1] * x1
+      const w1 = c1 * l1
+
+      // noise
+      const noise = w0 + x0 * (w1 - w0)
+
+      cData.data.push({x, y: c0}, {x, y: c1})
+      lData.data.push({x, y: l0}, {x, y: l1})
+      wData.data.push({x, y: w0}, {x, y: w1})
+      noiseData.data.push({x, y: noise})
+    }
+    const config = {
+      type: 'scatter',
+      data: {
+        datasets: [
+          // cData,
+          // lData,
+          // wData,
+          noiseData
+        ]
+      },
+      options: {}
+    }
+    const myChart = new Chart(
+      document.getElementById('myChart'),
+      config
+    )
+  </script>
+</body>
+</html>
